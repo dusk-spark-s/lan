@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>澜台</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23f6f8fb'/%3E%3Cpath d='M18 42c8-1 14-7 18-22 2 12 5 19 10 22' fill='none' stroke='%236f8aa7' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body data-theme="lume">
+  <div class="ambient" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="cursor-dot" aria-hidden="true"></div>
+  <div class="cursor-ring" aria-hidden="true"></div>
+  <div class="route-mask" aria-hidden="true"></div>
+  <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+
+  <main class="app-shell">
+    <aside class="sidebar glass">
+      <header class="side-top">
+        <button class="brand" data-route="workspace" data-magnetic title="工作台">
+          <span>澜</span>
+        </button>
+        <div class="theme-dock glass">
+          <button data-theme-choice="lume" title="极简"></button>
+          <button data-theme-choice="sea" title="拟态"></button>
+          <button data-theme-choice="violet" title="毛玻璃"></button>
+          <button data-theme-choice="garden" title="银雾"></button>
+          <button data-theme-choice="vintage" title="雨夜"></button>
+          <button data-theme-choice="night" title="雨璃"></button>
+        </div>
+        <button class="icon-btn sidebar-toggle" data-magnetic title="收起侧栏">☰</button>
+      </header>
+      <button class="sidebar-expand" title="展开侧栏">›</button>
+
+      <section class="side-section">
+        <div class="side-title">
+          <span>项目</span>
+          <button class="tiny-btn" id="newProjectButton" data-magnetic title="新建项目">＋</button>
+        </div>
+        <div class="project-list" id="projectList"></div>
+      </section>
+
+      <section class="side-section grow">
+        <div class="side-title">
+          <span>会话</span>
+          <button class="tiny-btn" id="newSessionButton" data-magnetic title="新建会话">＋</button>
+        </div>
+        <div class="thread-list" id="sessionList"></div>
+      </section>
+
+      <nav class="side-nav">
+        <button class="nav-item active" data-route="workspace" data-magnetic>工作台</button>
+        <button class="nav-item" data-route="studio" data-magnetic>工坊</button>
+        <button class="nav-item" data-route="masks" data-magnetic>面具</button>
+        <button class="nav-item" data-route="memory" data-magnetic>记忆</button>
+        <button class="nav-item" data-route="settings" data-magnetic>设置</button>
+      </nav>
+    </aside>
+    <button class="mobile-sidebar-handle" title="展开菜单">☰</button>
+
+    <section class="main-area">
+      <section class="page active" data-page="workspace">
+        <header class="topbar glass">
+          <div>
+            <h1 id="sessionTitle">桌面端产品规划</h1>
+          </div>
+          <div class="top-actions">
+            <button class="icon-btn summary-open" data-magnetic title="总结">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M5 5.5h14M5 10h10M5 14.5h14M5 19h7" />
+              </svg>
+            </button>
+            <button class="icon-btn context-open" data-magnetic title="上下文">◎</button>
+            <button class="icon-btn command-open" data-magnetic title="命令">⌕</button>
+            <button class="icon-btn preview-toggle" data-magnetic title="预览">◫</button>
+          </div>
+        </header>
+
+        <div class="chat-canvas glass">
+          <div class="budget-line" id="summaryProgress" title="自动总结进度">
+            <span id="summaryProgressFill"></span>
+            <em id="summaryProgressTip"></em>
+          </div>
+
+          <div class="messages" id="messages"></div>
+
+          <footer class="composer glass">
+            <details class="work-steps" id="workSteps">
+              <summary><span id="workStepLabel">step 0/0</span><em id="workStepState">等待工坊任务</em></summary>
+              <ol id="workStepList"></ol>
+            </details>
+            <div class="attachment-tray" id="attachmentTray"></div>
+            <div class="composer-row">
+              <button class="icon-btn plus-open" data-magnetic title="添加">＋</button>
+              <textarea id="composerInput" placeholder="输入消息"></textarea>
+              <button class="send-btn" id="sendButton" data-magnetic title="发送" aria-label="发送">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M7 17 17 7M9 7h8v8" />
+                </svg>
+              </button>
+            </div>
+            <div class="plus-menu glass">
+              <button id="addImageButton">图片</button>
+              <button id="addFileButton">文件</button>
+              <button id="quickModelButton">模型</button>
+              <button data-route="masks">面具</button>
+            </div>
+            <input type="file" id="imageInput" accept="image/*" multiple hidden>
+            <input type="file" id="fileInput" multiple hidden>
+          </footer>
+        </div>
+      </section>
+
+      <section class="page" data-page="masks">
+        <div class="page-board glass">
+          <header class="page-head">
+            <h1>面具</h1>
+            <button class="ghost-btn" id="newMaskButton">新建</button>
+          </header>
+          <div class="mask-workbench">
+            <aside class="mask-library">
+              <div class="segmented">
+                <button class="active" data-mask-kind="ai">AI 面具</button>
+                <button data-mask-kind="user">用户面具</button>
+              </div>
+              <div class="mask-list" id="maskList"></div>
+            </aside>
+            <section class="mask-editor" id="maskEditor">
+              <div class="mask-editor-head">
+                <label class="avatar-upload large">
+                  <input type="file" id="maskAvatarInput" accept="image/*">
+                  <span id="maskAvatarPreview">澜</span>
+                </label>
+                <div>
+                  <span id="maskKindLabel">AI 面具</span>
+                  <h2 id="maskEditorTitle">默认协作</h2>
+                </div>
+              </div>
+              <div class="form-grid">
+                <label>名称<input id="maskNameInput"></label>
+                <label>简称<input id="maskShortInput"></label>
+              </div>
+              <label class="stack-field" data-field="system">系统设定<textarea id="maskSystemInput"></textarea></label>
+              <label class="stack-field" data-field="profile">用户设定<textarea id="maskProfileInput"></textarea></label>
+              <div class="prompt-injection ai-only-mask-field">
+                <div class="prompt-injection-head">
+                  <label>提示词置入层级
+                    <select id="maskDepthInput">
+                      <option value="core">核心层</option>
+                      <option value="context">上下文层</option>
+                      <option value="session">会话层</option>
+                    </select>
+                  </label>
+                </div>
+                <label class="stack-field">提示词置入窗口<textarea id="maskInjectionInput"></textarea></label>
+              </div>
+              <label class="stack-field ai-only-mask-field">正则/规则<textarea id="maskRulesInput"></textarea></label>
+              <label class="stack-field ai-only-mask-field">MCP 预设<textarea id="maskMcpInput"></textarea></label>
+              <div class="prompt-preview">
+                <div class="prompt-preview-head">
+                  <strong>已拼装读取结果</strong>
+                </div>
+                <pre id="maskPromptPreview"></pre>
+              </div>
+              <div class="mask-actions">
+                <button class="ghost-btn" id="duplicateMaskButton">复制</button>
+                <button class="ghost-btn" id="deleteMaskButton">删除</button>
+                <button class="wide-action" id="saveMaskButton">保存并启用</button>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" data-page="memory">
+        <div class="page-board glass">
+          <header class="page-head">
+            <h1>记忆</h1>
+          </header>
+          <div class="cards-grid">
+            <article class="soft-card tilt-card">
+              <span>自动总结</span>
+              <h2><span id="summaryEveryLabel">30</span> 轮</h2>
+              <p>达到设定轮数后压缩旧消息。</p>
+              <label class="setting-control">
+                <span>触发轮数</span>
+                <input id="summaryEveryInput" type="number" min="5" max="100" step="1" value="30">
+              </label>
+            </article>
+            <article class="soft-card tilt-card">
+              <span>项目记忆</span>
+              <h2><span id="projectMemoryCount">0</span> 条</h2>
+              <p>仅当前项目读取。</p>
+            </article>
+            <article class="soft-card tilt-card">
+              <span>全局记忆</span>
+              <h2 id="globalMemoryState">关闭</h2>
+              <p>开启后所有会话共享。</p>
+              <div class="setting-control">
+                <span>共享记忆</span>
+                <label class="switch"><input type="checkbox" id="sharedMemoryToggle"><span></span></label>
+              </div>
+            </article>
+          </div>
+          <div class="memory-panels">
+            <article class="soft-card">
+              <div class="prompt-preview-head">
+                <strong>手动记忆</strong>
+                <button class="ghost-btn" id="addUserMemoryButton">添加</button>
+              </div>
+              <textarea id="userMemoryInput" placeholder="写下你希望 AI 长期记住的偏好、背景、项目规则"></textarea>
+              <div class="memory-list" id="userMemoryList"></div>
+            </article>
+            <article class="soft-card">
+              <div class="prompt-preview-head">
+                <strong>自动总结记录</strong>
+                <button class="ghost-btn" id="toggleSummaryRecordsButton">展开</button>
+              </div>
+              <div class="summary-records collapsed" id="summaryRecordsList"></div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" data-page="settings">
+        <div class="settings-grid">
+          <aside class="settings-menu glass">
+            <h1>设置</h1>
+            <button class="settings-item active" data-settings="api">API 配置</button>
+            <button class="settings-item" data-settings="agent">本地 Agent</button>
+            <button class="settings-item" data-settings="prompt">内置提示词</button>
+            <button class="settings-item" data-settings="appearance">外观主题</button>
+            <button class="settings-item" data-settings="backup">备份恢复</button>
+            <button class="settings-item" data-settings="mcp">MCP 配置</button>
+            <button class="settings-item" data-settings="data">数据管理</button>
+          </aside>
+          <section class="settings-panel glass">
+            <article class="settings-page active" data-settings-page="api">
+              <header class="page-head"><h1>API 配置</h1><button class="ghost-btn" id="newApiConfigButton">新建</button></header>
+              <div class="api-workbench">
+                <aside class="api-list" id="apiConfigList"></aside>
+                <div class="api-editor">
+                  <div class="form-grid">
+                    <label>名称<input id="apiNameInput" autocomplete="off"></label>
+                    <label>Base URL<input id="apiBaseUrlInput" placeholder="https://api.example.com/v1" autocomplete="off"></label>
+                    <label>API Key<input id="apiKeyInput" type="password" autocomplete="off"></label>
+                    <label>接口<select id="apiEndpointInput"><option>chat/completions</option><option>responses</option></select></label>
+                    <label>模型<select id="apiModelSelect"></select></label>
+                    <label>手动模型名<input id="apiModelManualInput" placeholder="例如 gpt-5.4" autocomplete="off"></label>
+                    <div class="inline-setting"><span>流式输出</span><label class="switch"><input type="checkbox" id="apiStreamToggle" checked><span></span></label></div>
+                    <div class="inline-setting"><span>真人分段</span><label class="switch"><input type="checkbox" id="humanSplitToggle" checked><span></span></label></div>
+                  </div>
+                  <div class="api-actions">
+                    <button class="wide-action" id="fetchModelsButton">拉取模型</button>
+                    <button class="ghost-btn" id="saveApiConfigButton">保存配置</button>
+                    <button class="ghost-btn" id="deleteApiConfigButton">删除</button>
+                  </div>
+                  <p class="api-status" id="apiStatusText">配置只保存在本地浏览器。</p>
+                </div>
+              </div>
+            </article>
+            <article class="settings-page" data-settings-page="agent">
+              <header class="page-head"><h1>本地 Agent</h1><button class="ghost-btn" id="agentCheckButton">检查连接</button></header>
+              <div class="soft-card agent-card">
+                <span>Termux / 本机执行层</span>
+                <h2 id="agentStatusText">未连接</h2>
+                <p>用于读写项目文件、运行白名单命令、启动预览和返回日志。第一版先做连接检查。</p>
+                <div class="form-grid">
+                  <label>Agent 地址<input id="agentBaseUrlInput" value="http://127.0.0.1:8787" autocomplete="off"></label>
+                  <label>工作目录<input id="agentRootInput" value="~/lantai-projects" autocomplete="off"></label>
+                  <div class="inline-setting"><span>启用本地 Agent</span><label class="switch"><input type="checkbox" id="agentEnabledToggle"><span></span></label></div>
+                  <div class="inline-setting"><span>失败后自动修复一次</span><label class="switch"><input type="checkbox" id="agentAutoRepairToggle"><span></span></label></div>
+                </div>
+                <div class="api-actions">
+                  <button class="wide-action" id="saveAgentButton">保存 Agent</button>
+                  <button class="ghost-btn" id="agentCopyCommandButton">复制 Termux 命令</button>
+                </div>
+                <pre class="agent-command" id="agentCommandText"></pre>
+              </div>
+            </article>
+            <article class="settings-page" data-settings-page="prompt">
+              <header class="page-head"><h1>内置提示词</h1><button class="ghost-btn" id="unlockPromptButton">解锁</button></header>
+              <div class="soft-card">
+                <p>需要授权后查看和编辑。</p>
+                <div class="form-grid">
+                  <label>密码<input id="promptPasswordInput" type="password" autocomplete="off"></label>
+                </div>
+                <div class="prompt-editors">
+                  <label>简易工作台提示词<textarea id="simplePromptEditor" placeholder="未解锁" disabled></textarea></label>
+                  <label>工坊提示词<textarea id="complexPromptEditor" placeholder="未解锁" disabled></textarea></label>
+                </div>
+                <div class="api-actions">
+                  <button class="wide-action" id="saveBasePromptButton">保存提示词</button>
+                  <button class="ghost-btn" id="resetBasePromptButton">恢复默认</button>
+                </div>
+              </div>
+            </article>
+            <article class="settings-page" data-settings-page="appearance">
+              <header class="page-head"><h1>外观主题</h1></header>
+              <div class="theme-grid">
+                <button class="theme-swatch" data-theme-choice="lume"><span></span><strong>极简</strong></button>
+                <button class="theme-swatch" data-theme-choice="sea"><span></span><strong>拟态</strong></button>
+                <button class="theme-swatch" data-theme-choice="violet"><span></span><strong>毛玻璃</strong></button>
+                <button class="theme-swatch" data-theme-choice="garden"><span></span><strong>银雾</strong></button>
+                <button class="theme-swatch" data-theme-choice="vintage"><span></span><strong>雨夜</strong></button>
+                <button class="theme-swatch" data-theme-choice="night"><span></span><strong>雨璃</strong></button>
+              </div>
+              <div class="theme-bg-panel glass" id="themeBgPanel">
+                <div>
+                  <strong>主题背景</strong>
+                  <p id="themeBgHint">当前主题不需要自定义背景。</p>
+                </div>
+                <div class="theme-bg-preview" id="themeBgPreview"></div>
+                <label class="theme-bg-upload">
+                  上传背景图
+                  <input id="themeBgFile" type="file" accept="image/*" hidden>
+                </label>
+                <div class="theme-bg-row">
+                  <input id="themeBgUrl" type="url" placeholder="粘贴图片 URL 作为背景">
+                  <button class="ghost-btn" id="applyThemeBgUrl">应用</button>
+                </div>
+                <button class="ghost-btn" id="resetThemeBg">恢复默认背景</button>
+              </div>
+            </article>
+            <article class="settings-page" data-settings-page="backup">
+              <header class="page-head"><h1>备份恢复</h1></header>
+              <div class="soft-card">
+                <h2>本地备份包</h2>
+                <p>项目、会话、面具、记忆、主题与配置。API Key 默认排除。</p>
+                <div class="backup-actions">
+                  <button class="wide-action" id="exportBackupButton">导出备份</button>
+                  <button class="ghost-btn" id="importBackupButton">导入恢复</button>
+                  <button class="ghost-btn" id="pasteBackupButton">粘贴恢复</button>
+                  <input type="file" id="backupFileInput" accept="application/json,.json" hidden>
+                </div>
+              </div>
+            </article>
+            <article class="settings-page" data-settings-page="mcp">
+              <header class="page-head"><h1>MCP 配置</h1></header>
+              <div class="form-grid">
+                <label>服务名称<input value="filesystem"></label>
+                <label>启动命令<input value="npx @modelcontextprotocol/server-filesystem"></label>
+              </div>
+            </article>
+            <article class="settings-page" data-settings-page="data">
+              <header class="page-head"><h1>数据管理</h1></header>
+              <div class="cards-grid">
+                <article class="soft-card"><span>回收站</span><h2 id="trashCount">0</h2></article>
+                <article class="soft-card"><span>草稿</span><h2>开启</h2></article>
+                <article class="soft-card"><span>快照</span><h2>自动</h2></article>
+              </div>
+              <div class="trash-panel">
+                <div class="prompt-preview-head">
+                  <strong>回收站</strong>
+                  <button class="ghost-btn" id="emptyTrashButton">清空</button>
+                </div>
+                <div class="trash-list" id="trashList"></div>
+              </div>
+            </article>
+          </section>
+        </div>
+      </section>
+    </section>
+
+    <aside class="preview-drawer glass">
+      <button class="drawer-tab preview-toggle" data-magnetic>预览</button>
+      <header>
+        <h2 id="drawerTitle">工作预览</h2>
+        <button class="icon-btn preview-toggle" data-magnetic title="关闭">×</button>
+      </header>
+      <div class="drawer-list">
+        <button class="active" data-drawer-view="context">上下文读取</button>
+        <button data-drawer-view="artifacts">产物文件</button>
+        <button data-drawer-view="html">HTML 沙盒预览</button>
+      </div>
+      <div class="preview-frame" id="drawerContent"></div>
+    </aside>
+  </main>
+
+  <div class="modal-backdrop" data-modal="summary">
+    <section class="modal glass">
+      <header class="page-head">
+        <h1>总结</h1>
+        <button class="icon-btn modal-close" title="关闭">×</button>
+      </header>
+      <div class="summary-grid">
+        <button class="summary-card active">压缩上文<span>保留最近 8 轮</span></button>
+        <button class="summary-card">总结选中</button>
+        <button class="summary-card">项目记忆</button>
+        <button class="summary-card">全局记忆</button>
+      </div>
+      <textarea>第一版以网页端界面为主，保留后续桌面和安卓打包可能。</textarea>
+      <div class="modal-actions">
+        <button class="ghost-btn modal-close">草稿</button>
+        <button class="wide-action modal-close" id="manualSummaryButton">应用</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" data-modal="context">
+    <section class="modal glass">
+      <header class="page-head">
+        <h1>上下文</h1>
+        <button class="icon-btn modal-close" title="关闭">×</button>
+      </header>
+      <div class="context-list">
+        <div><strong>AI 面具</strong><span>默认协作</span></div>
+        <div><strong>用户面具</strong><span>个人开发者</span></div>
+        <div><strong>项目记忆</strong><span>3 条</span></div>
+        <div><strong>最近消息</strong><span>8 轮</span></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" data-modal="confirm">
+    <section class="modal confirm-modal glass">
+      <header class="page-head">
+        <h1 id="confirmTitle">确认操作</h1>
+        <button class="icon-btn modal-close" title="关闭">×</button>
+      </header>
+      <p id="confirmBody">这个操作需要确认。</p>
+      <input id="confirmInput" class="confirm-input" hidden>
+      <div class="modal-actions">
+        <button class="ghost-btn" id="confirmCancel">取消</button>
+        <button class="ghost-btn danger" id="confirmReject" hidden>拒绝</button>
+        <button class="wide-action" id="confirmOk">确认</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" data-modal="backupText">
+    <section class="modal glass">
+      <header class="page-head">
+        <h1>备份内容</h1>
+        <button class="icon-btn modal-close" title="关闭">×</button>
+      </header>
+      <p id="backupStatusText"></p>
+      <textarea id="backupTextOutput" readonly></textarea>
+      <div class="modal-actions">
+        <button class="ghost-btn" id="copyBackupText">复制</button>
+        <button class="wide-action modal-close">完成</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" data-modal="backupPaste">
+    <section class="modal glass">
+      <header class="page-head">
+        <h1>粘贴恢复</h1>
+        <button class="icon-btn modal-close" title="关闭">×</button>
+      </header>
+      <textarea id="backupPasteInput" placeholder="粘贴澜台备份 JSON"></textarea>
+      <div class="modal-actions">
+        <button class="ghost-btn modal-close">取消</button>
+        <button class="wide-action" id="importBackupTextButton">导入</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" data-modal="imagePreview">
+    <section class="modal image-modal glass">
+      <header class="page-head">
+        <h1 id="imagePreviewTitle">图片</h1>
+        <button class="icon-btn modal-close" title="关闭">×</button>
+      </header>
+      <img id="imagePreview" alt="">
+    </section>
+  </div>
+
+  <div class="command-palette glass">
+    <input id="commandSearchInput" placeholder="搜索当前会话">
+    <div class="command-results" id="commandResults"></div>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
